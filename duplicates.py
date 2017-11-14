@@ -1,6 +1,7 @@
 import os
 import sys
 import hashlib
+from collections import defaultdict
 
 
 def get_file_md5(path):
@@ -19,21 +20,20 @@ def get_file_md5(path):
 
 
 def get_duplicate_files(file_hashes):
-    dup_files = list(file_path for path_list in file_hashes.values() if len(path_list) > 1 for file_path in path_list)
+    dup_files = {key: value for key, value in file_hashes.items() if len(value) > 1}
     return dup_files
 
 
 def crawling_directory(path):
-    processed_files = {}
+    processed_files = defaultdict(list)
     for dir_path, dir_names, file_names in os.walk(path):
-        if file_names:
-            for file_name in file_names:
-                full_path = os.path.join(dir_path, file_name)
-                file_md5 = get_file_md5(full_path)
-                if file_md5 in processed_files.keys():
-                    processed_files[file_md5].append(full_path)
-                else:
-                    processed_files[file_md5] = [full_path]
+        for file_name in file_names:
+            full_path = os.path.join(dir_path, file_name)
+            file_md5 = get_file_md5(full_path)
+            if file_md5 in processed_files.keys():
+                processed_files[file_md5].append(full_path)
+            else:
+                processed_files[file_md5] = [full_path]
     return processed_files
 
 if __name__ == '__main__':
@@ -42,7 +42,9 @@ if __name__ == '__main__':
         crawl_results = crawling_directory(directory_path)
         duplicates_files = get_duplicate_files(crawl_results)
 
-        for file in duplicates_files:
-            print(file)
+        for files in duplicates_files.values():
+            print("Файлы дубли: ")
+            print(*files, sep='\n')
+            print("---------------------------------")
     else:
         print('Укажите путь к папке: python duplicates.py <directory_path>')
