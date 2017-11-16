@@ -30,10 +30,7 @@ def crawling_directory(path):
         for file_name in file_names:
             full_path = os.path.join(dir_path, file_name)
             file_md5 = get_file_md5(full_path)
-            if file_md5 in processed_files.keys():
-                processed_files[file_md5].append(full_path)
-            else:
-                processed_files[file_md5] = [full_path]
+            processed_files[file_md5].append(full_path)
     return processed_files
 
 if __name__ == '__main__':
